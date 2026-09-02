@@ -50,8 +50,6 @@ Data is discarded when you stop it.
 | `GOOGLE_SERVICE_ACCOUNT_EMAIL` | no | Service account for Drive. |
 | `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | no | Its private key, with `\n` escapes preserved. |
 | `GOOGLE_DRIVE_ROOT_FOLDER_ID` | no | Parent folder for folders the portal creates. |
-| `MASTER_OTP` | no | Break-glass sign-in code for when email is down. See below. |
-| `MASTER_OTP_EMAILS` | no | Addresses allowed to use it. Empty means every account. |
 
 **Drive is optional.** Without it the portal runs normally; browsing, streaming and
 uploads show a clear "not configured" state rather than failing. Everything else —
@@ -66,38 +64,6 @@ accounts, activities, dates, assignments, reviews, mapping records — works.
 5. Restart the server. Admin → Drive Folders should now show *Drive connected*.
 
 Keep those folders private. Students never receive a folder URL — see below.
-
-### The master sign-in code
-
-Sign-in depends on email. If the mail provider refuses a message — an expired key, a
-sender that is no longer verified, a network block on the day of an event — nobody can
-get in. `MASTER_OTP` is the way back in.
-
-```dotenv
-MASTER_OTP="418209"                      # any unpredictable 6 digits
-MASTER_OTP_EMAILS="office@xlri.ac.in"    # who may use it
-```
-
-Sign in exactly as usual: enter the email, press **Send sign-in code**, then type the
-master code into the six boxes instead of the one that never arrived.
-
-It is a spare key, not a back door:
-
-- **It does not skip the login flow.** A code still has to be requested first, and the
-  master code is checked against that request — so the 10-minute expiry and the
-  five-attempt lockout apply to it too. Five wrong guesses and the attacker starts over
-  with a fresh 45-second wait, which is what keeps six digits sufficient.
-- **It cannot create or revive an account.** Deactivated and unknown addresses are
-  refused exactly as before.
-- **`MASTER_OTP_EMAILS` is the important line.** Left empty, the code signs in as *any*
-  active account, students included. Keep it to the office.
-- **Every use is logged** — `MASTER CODE SIGN-IN email=… role=… ip=… at=…` — so it is
-  visible in the server log afterwards.
-- Repeated or sequential digits (`111111`, `123456`, `654321`) are refused at startup,
-  and so is anything that is not six digits. A rejected value logs a warning and leaves
-  the fallback **off** rather than half-configured.
-
-Clear `MASTER_OTP` to switch it off, and change it whenever someone who knew it leaves.
 
 ---
 
