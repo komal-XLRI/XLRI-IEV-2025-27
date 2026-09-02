@@ -1,0 +1,302 @@
+@import "tailwindcss";
+
+/* ─────────────────────────── design tokens ─────────────────────────── */
+
+/* XLRI identity — crest blue, wordmark grey, and the green from the "i". */
+@theme {
+  --color-navy-50: #f0f4fc;
+  --color-navy-100: #dde7f8;
+  --color-navy-200: #c0d2f1;
+  --color-navy-300: #93b0e5;
+  --color-navy-400: #5f86d5;
+  --color-navy-500: #3b63c0;
+  --color-navy-600: #2a4ca8;
+  --color-navy-700: #234795;
+  --color-navy-800: #1c3f94;
+  --color-navy-900: #16337f;
+  --color-navy-950: #0e2054;
+
+  --color-xlri-green: #8dc63f;
+  --color-xlri-green-dark: #6fa32c;
+  --color-xlri-grey: #939598;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
+
+  --radius-card: 0.875rem;
+}
+
+:root {
+  color-scheme: light;
+
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #fafbfc;
+  --surface-hover: #f3f5f8;
+  --border: #e3e7ed;
+  --border-strong: #cdd4de;
+
+  --fg: #101828;
+  --fg-muted: #5a6577;
+  --fg-subtle: #8a93a3;
+
+  --brand: #1c3f94;
+  --brand-fg: #ffffff;
+  --brand-soft: #e8eef9;
+  --brand-soft-fg: #1a3a85;
+
+  --accent: #6fa32c;
+  --accent-bright: #8dc63f;
+  --accent-soft: #eef7e0;
+  /* Ratings stay amber — green stars read as a status, not a score. */
+  --star: #d99a00;
+
+  --ok: #157347;
+  --ok-soft: #e6f4ec;
+  --warn: #b06a00;
+  --warn-soft: #fdf1de;
+  --info: #1e64b0;
+  --info-soft: #e7f0fa;
+  --danger: #b42318;
+  --danger-soft: #fdecea;
+
+  --ring: #3b63c0;
+  --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow-md: 0 2px 4px -1px rgb(16 24 40 / 0.06), 0 4px 12px -2px rgb(16 24 40 / 0.08);
+  --shadow-lg: 0 8px 24px -6px rgb(16 24 40 / 0.14);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0b1220;
+  --surface: #121b2c;
+  --surface-2: #161f31;
+  --surface-hover: #1b2740;
+  --border: #24314b;
+  --border-strong: #34456a;
+
+  --fg: #e9edf5;
+  --fg-muted: #9aa7bd;
+  --fg-subtle: #6d7c96;
+
+  --brand: #6e96e4;
+  --brand-fg: #0a142b;
+  --brand-soft: #1b2a4e;
+  --brand-soft-fg: #b3c9f0;
+
+  --accent: #a5d95a;
+  --accent-bright: #b6e46f;
+  --accent-soft: #1e3110;
+  --star: #e8b93a;
+
+  --ok: #56cc94;
+  --ok-soft: #12301f;
+  --warn: #e0a457;
+  --warn-soft: #33240f;
+  --info: #6aa9e9;
+  --info-soft: #12253d;
+  --danger: #f27c72;
+  --danger-soft: #3a1613;
+
+  --ring: #6aa9e9;
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 2px 6px -1px rgb(0 0 0 / 0.45), 0 6px 16px -4px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 32px -8px rgb(0 0 0 / 0.6);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-hover: var(--surface-hover);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-subtle: var(--fg-subtle);
+  --color-brand: var(--brand);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-soft-fg: var(--brand-soft-fg);
+  --color-accent: var(--accent);
+  --color-accent-bright: var(--accent-bright);
+  --color-accent-soft: var(--accent-soft);
+  --color-star: var(--star);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+}
+
+/* ────────────────────────────── base ───────────────────────────────── */
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--brand-soft);
+  color: var(--brand-soft-fg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Scrollbars — subtle, theme aware */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ──────────────────────────── utilities ────────────────────────────── */
+
+@utility card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-sm);
+}
+
+/*
+ * The official logo is dark type (blue crest, grey wordmark) on transparency.
+ * On a dark surface the crest sinks into the background, so it gets a light
+ * chip instead of being flattened to white — that keeps the real crest blue
+ * and the green on the "i".
+ */
+.brand-logo[data-on-dark="true"],
+:root[data-theme="dark"] .brand-logo {
+  background: #ffffff;
+  border-radius: 5px;
+  padding: 3px 6px;
+  box-sizing: content-box;
+}
+
+@utility surface-grid {
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* ───────────────────────────── animation ───────────────────────────── */
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/*
+ * `backwards`, not `both`: with `both` the final keyframe sticks, and a
+ * `transform: none` that has been *animated to* still computes as an identity
+ * matrix — which makes the element a containing block for any `position: fixed`
+ * descendant, pulling overlays out of the viewport once the page is scrolled.
+ */
+.animate-fade-rise {
+  animation: fade-rise 0.32s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+.animate-fade-in {
+  animation: fade-in 0.2s ease both;
+}
+.animate-scale-in {
+  animation: scale-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-hover);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.14), transparent);
+  animation: shimmer 1.6s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print — reports and attendance sheets come out clean */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "iev-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "seed": "node --experimental-strip-types scripts/seed.ts",
+    "db:dev": "node --experimental-strip-types scripts/dev-db.ts",
+    "typecheck": "tsc --noEmit",
+    "email:logo": "node --experimental-strip-types scripts/make-email-logo.ts"
+  },
+  "dependencies": {
+    "@googleapis/drive": "^21.0.0",
+    "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
+    "jose": "^5.9.6",
+    "lucide-react": "^0.468.0",
+    "mongoose": "^8.9.5",
+    "next": "^16.3.3",
+    "nodemailer": "^9.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "read-excel-file": "^9.3.10",
+    "server-only": "^0.0.1",
+    "tailwind-merge": "^2.6.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.0.0",
+    "@types/node": "^22.10.7",
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "mongodb-memory-server": "^11.2.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.3"
+  }
+}
