@@ -24,7 +24,6 @@ import {
   Field,
   Input,
   PageHeader,
-  Select,
   Stat,
   StatusBadge,
   Table,
@@ -33,10 +32,10 @@ import {
   Tr,
 } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
-import { apiFetch, formatDate, formatTimeRange, initials, toDateInput } from "@/lib/client";
+import { apiFetch, formatDate, formatTimeRange, toDateInput } from "@/lib/client";
+import { AttendanceDialog, type Attendance } from "./attendance-dialog";
 
 type Student = { _id: string; rollNumber: string; userId?: { name?: string } };
-type Attendance = "PRESENT" | "ABSENT" | "EXCUSED";
 
 const emptySession = { title: "", date: "", startTime: "", endTime: "", speaker: "", venue: "" };
 
@@ -63,6 +62,7 @@ export function WorkshopClient({
   const [sessionForm, setSessionForm] = React.useState(emptySession);
   const [reportForm, setReportForm] = React.useState({ title: "", driveUrl: "" });
   const [roster, setRoster] = React.useState<Record<string, Attendance>>({});
+  const [attendanceDate, setAttendanceDate] = React.useState("");
 
   const sessions = workshop.sessions ?? [];
 
@@ -112,24 +112,21 @@ export function WorkshopClient({
 
   function openAttendance(session: any) {
     // Seed the roster from what is stored; anyone unrecorded defaults to absent.
+    // Older records may hold EXCUSED, which the sheet no longer offers — those
+    // read as absent until the session is marked again.
     const existing = new Map(
       (session.participants ?? []).map((p: any) => [String(p.studentId), p.attendance]),
     );
     const next: Record<string, Attendance> = {};
     for (const student of students) {
-      next[String(student._id)] = (existing.get(String(student._id)) as Attendance) ?? "ABSENT";
+      next[String(student._id)] =
+        existing.get(String(student._id)) === "PRESENT" ? "PRESENT" : "ABSENT";
     }
     setRoster(next);
+    // An undated session opens on today, so marking it settles the date.
+    setAttendanceDate(toDateInput(session.date) || toDateInput(new Date()));
     setAttendanceFor(session);
   }
-
-  function markAll(value: Attendance) {
-    const next: Record<string, Attendance> = {};
-    for (const student of students) next[String(student._id)] = value;
-    setRoster(next);
-  }
-
-  const presentInRoster = Object.values(roster).filter((v) => v === "PRESENT").length;
 
   return (
     <>
@@ -402,71 +399,36 @@ export function WorkshopClient({
       </Dialog>
 
       {/* Attendance */}
-      <Dialog
-        open={Boolean(attendanceFor)}
-        onClose={() => setAttendanceFor(null)}
-        title={`Attendance — ${attendanceFor?.title ?? ""}`}
-        description={`${presentInRoster} of ${students.length} marked present`}
-        size="lg"
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setAttendanceFor(null)}>
-              Cancel
-            </Button>
-            <Button
-              loading={saving}
-              onClick={() =>
-                post(
-                  {
-                    action: "setAttendance",
-                    sessionId: String(attendanceFor._id),
-                    entries: Object.entries(roster).map(([studentId, attendance]) => ({
-                      studentId,
-                      attendance,
-                    })),
-                  },
-                  "Attendance saved",
-                )
-              }
-            >
-              Save attendance
-            </Button>
-          </>
+      <AttendanceDialog
+        session={attendanceFor}
+        sessionNumber={
+          attendanceFor
+            ? sessions.findIndex((s: any) => String(s._id) === String(attendanceFor._id)) + 1
+            : 0
         }
-      >
-        <div className="mb-3 flex flex-wrap gap-2">
-          <Button size="sm" variant="secondary" onClick={() => markAll("PRESENT")}>
-            Mark all present
-          </Button>
-          <Button size="sm" variant="secondary" onClick={() => markAll("ABSENT")}>
-            Mark all absent
-          </Button>
-        </div>
-        <ul className="divide-y divide-[var(--border)] rounded-lg border border-[var(--border)]">
-          {students.map((student) => (
-            <li key={student._id} className="flex items-center gap-3 px-3.5 py-2.5">
-              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-[var(--brand-soft)] text-[11px] font-semibold text-[var(--brand-soft-fg)]">
-                {initials(student.userId?.name)}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[13.5px] font-medium">{student.userId?.name ?? "—"}</p>
-                <p className="text-[12px] text-[var(--fg-subtle)]">{student.rollNumber}</p>
-              </div>
-              <Select
-                className="h-8 w-32 text-[13px]"
-                value={roster[String(student._id)] ?? "ABSENT"}
-                onChange={(e) =>
-                  setRoster({ ...roster, [String(student._id)]: e.target.value as Attendance })
-                }
-              >
-                <option value="PRESENT">Present</option>
-                <option value="ABSENT">Absent</option>
-                <option value="EXCUSED">Excused</option>
-              </Select>
-            </li>
-          ))}
-        </ul>
-      </Dialog>
+        sessionCount={sessions.length}
+        students={students}
+        roster={roster}
+        onChange={setRoster}
+        date={attendanceDate}
+        onDateChange={setAttendanceDate}
+        onClose={() => setAttendanceFor(null)}
+        saving={saving}
+        onSave={() =>
+          post(
+            {
+              action: "setAttendance",
+              sessionId: String(attendanceFor._id),
+              date: attendanceDate || null,
+              entries: students.map((student) => ({
+                studentId: String(student._id),
+                attendance: roster[String(student._id)] ?? "ABSENT",
+              })),
+            },
+            "Attendance saved",
+          )
+        }
+      />
 
       {/* Report */}
       <Dialog

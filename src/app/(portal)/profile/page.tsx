@@ -58,32 +58,16 @@ export default async function ProfilePage() {
         description="Your record as held by the IEV office. Contact them if anything needs correcting."
       />
 
-      <Card className="overflow-hidden">
-        <div className="relative h-24 bg-[var(--color-navy-900)]">
-          <div className="surface-grid absolute inset-0 opacity-[0.08]" />
-          {/* the green rule from the XLRI identity */}
-          <div className="absolute inset-x-0 bottom-0 h-[3px] bg-[var(--color-xlri-green)]" />
-        </div>
-
-        <div className="px-5 pb-5 sm:px-6 sm:pb-6">
-          {/*
-           * Only the avatar is lifted over the banner. Pulling the whole row up
-           * put the name across the green rule, and left it fighting the badges
-           * for width until it truncated to a single letter on a phone.
-           */}
-          {/*
-           * The avatar is a flex item, not a bare block: a grid box with no
-           * width of its own would otherwise stretch the full width of the card.
-           */}
-          <div className="flex">
-            <span className="-mt-10 grid h-20 w-20 shrink-0 place-items-center rounded-2xl border-4 border-[var(--surface)] bg-[var(--brand)] text-[22px] leading-none font-semibold text-[var(--brand-fg)]">
+      {/* A plain card, in the same language as the rest of the portal. */}
+      <Card>
+        <CardBody>
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-5">
+            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-full bg-[var(--brand)] text-[16px] font-semibold text-[var(--brand-fg)]">
               {initials(profile.user?.name)}
             </span>
-          </div>
 
-          <div className="mt-3.5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
-            <div className="min-w-0">
-              <h2 className="text-[19px] leading-7 font-semibold tracking-[-0.01em] text-[var(--fg)]">
+            <div className="min-w-0 flex-1">
+              <h2 className="truncate text-[18px] leading-6 font-semibold text-[var(--fg)]">
                 {profile.user?.name ?? "—"}
               </h2>
               {profile.user?.email && (
@@ -97,15 +81,16 @@ export default async function ProfilePage() {
               )}
             </div>
 
-            <div className="flex flex-wrap gap-2 sm:shrink-0 sm:justify-end">
+            <div className="flex flex-wrap gap-2 sm:shrink-0">
               <Badge tone="brand">Roll {profile.rollNumber}</Badge>
               {profile.batch && <Badge tone="neutral">Batch {profile.batch}</Badge>}
             </div>
           </div>
-        </div>
+        </CardBody>
       </Card>
 
-      <div className="mt-5 grid gap-5 lg:grid-cols-3">
+      {/* `items-start` so a short section does not stretch to match a long one. */}
+      <div className="mt-5 grid items-start gap-5 lg:grid-cols-3">
         {sections.map((section) => (
           <Card key={section.key}>
             <CardHeader title={section.label} icon={section.icon} />

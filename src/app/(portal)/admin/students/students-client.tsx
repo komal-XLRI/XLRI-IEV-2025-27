@@ -1,26 +1,24 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FileStack, GraduationCap, Pencil, Search } from "lucide-react";
+import { ChevronRight, FileStack, GraduationCap, Pencil, Search } from "lucide-react";
 import {
   Badge,
   Button,
   Card,
-  Dialog,
   EmptyState,
-  Field,
   Input,
   PageHeader,
   Table,
   Td,
-  Textarea,
   Th,
   Tr,
 } from "@/components/ui";
-import { useToast } from "@/components/ui/toast";
-import { apiFetch, initials } from "@/lib/client";
+import { initials } from "@/lib/client";
 import { ImportStudents } from "@/components/import-students";
+import { EditStudentDialog } from "@/components/edit-student";
 
 type Row = {
   _id: string;
@@ -36,18 +34,9 @@ type Row = {
 
 export function StudentsClient({ students }: { students: Row[] }) {
   const router = useRouter();
-  const { push } = useToast();
 
   const [query, setQuery] = React.useState("");
   const [editing, setEditing] = React.useState<Row | null>(null);
-  const [saving, setSaving] = React.useState(false);
-  const [form, setForm] = React.useState({
-    rollNumber: "",
-    batch: "",
-    background: "",
-    strengths: "",
-    weakness: "",
-  });
 
   const filtered = React.useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -60,21 +49,6 @@ export function StudentsClient({ students }: { students: Row[] }) {
         (s.ventureName ?? "").toLowerCase().includes(q),
     );
   }, [students, query]);
-
-  async function save() {
-    if (!editing) return;
-    setSaving(true);
-    try {
-      await apiFetch(`/api/admin/students/${editing._id}`, { method: "PATCH", json: form });
-      push("success", "Student updated");
-      setEditing(null);
-      router.refresh();
-    } catch (err) {
-      push("error", "Could not save", err instanceof Error ? err.message : "Try again.");
-    } finally {
-      setSaving(false);
-    }
-  }
 
   return (
     <>
@@ -126,16 +100,26 @@ export function StudentsClient({ students }: { students: Row[] }) {
             </thead>
             <tbody>
               {filtered.map((student) => (
-                <Tr key={student._id}>
+                <Tr
+                  key={student._id}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/admin/students/${student._id}`)}
+                >
                   <Td>
                     <div className="flex items-center gap-2.5">
                       <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[var(--brand-soft)] text-[11.5px] font-semibold text-[var(--brand-soft-fg)]">
                         {initials(student.userId?.name)}
                       </span>
                       <div className="min-w-0">
-                        <p className="truncate text-[13.5px] font-medium">
+                        {/* A real link as well as the row click, so the record is
+                            reachable by keyboard and openable in a new tab. */}
+                        <Link
+                          href={`/admin/students/${student._id}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="block truncate text-[13.5px] font-medium hover:text-[var(--brand)] hover:underline"
+                        >
                           {student.userId?.name ?? "—"}
-                        </p>
+                        </Link>
                         <p className="truncate text-[12px] text-[var(--fg-subtle)]">
                           {student.userId?.email}
                         </p>
@@ -160,23 +144,20 @@ export function StudentsClient({ students }: { students: Row[] }) {
                     </span>
                   </Td>
                   <Td className="text-right">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => {
-                        setEditing(student);
-                        setForm({
-                          rollNumber: student.rollNumber ?? "",
-                          batch: student.batch ?? "",
-                          background: student.background ?? "",
-                          strengths: student.strengths ?? "",
-                          weakness: student.weakness ?? "",
-                        });
-                      }}
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                      Edit
-                    </Button>
+                    <div className="flex items-center justify-end gap-1.5">
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditing(student);
+                        }}
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Edit
+                      </Button>
+                      <ChevronRight className="h-4 w-4 text-[var(--fg-subtle)]" />
+                    </div>
                   </Td>
                 </Tr>
               ))}
@@ -185,61 +166,7 @@ export function StudentsClient({ students }: { students: Row[] }) {
         )}
       </Card>
 
-      <Dialog
-        open={Boolean(editing)}
-        onClose={() => setEditing(null)}
-        title={editing?.userId?.name ?? "Edit student"}
-        description="This is what the student sees on their profile page."
-        footer={
-          <>
-            <Button variant="ghost" onClick={() => setEditing(null)}>
-              Cancel
-            </Button>
-            <Button onClick={save} loading={saving}>
-              Save changes
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Roll number" required>
-              <Input
-                value={form.rollNumber}
-                onChange={(e) => setForm({ ...form, rollNumber: e.target.value })}
-              />
-            </Field>
-            <Field label="Batch">
-              <Input
-                placeholder="e.g. 2024-26"
-                value={form.batch}
-                onChange={(e) => setForm({ ...form, batch: e.target.value })}
-              />
-            </Field>
-          </div>
-          <Field label="Background">
-            <Textarea
-              rows={3}
-              value={form.background}
-              onChange={(e) => setForm({ ...form, background: e.target.value })}
-            />
-          </Field>
-          <Field label="Strengths">
-            <Textarea
-              rows={3}
-              value={form.strengths}
-              onChange={(e) => setForm({ ...form, strengths: e.target.value })}
-            />
-          </Field>
-          <Field label="Areas to develop">
-            <Textarea
-              rows={3}
-              value={form.weakness}
-              onChange={(e) => setForm({ ...form, weakness: e.target.value })}
-            />
-          </Field>
-        </div>
-      </Dialog>
+      <EditStudentDialog student={editing} onClose={() => setEditing(null)} />
     </>
   );
 }

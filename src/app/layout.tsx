@@ -10,6 +10,12 @@ export const metadata: Metadata = {
   },
   description: `${BRAND.institutionFull}, ${BRAND.campus} — ${BRAND.unit} student activity portal for workshops, mentoring, internships, capstone, demo day and the startup conclave.`,
   applicationName: `${BRAND.unitShort} ${BRAND.product}`,
+  /*
+   * Served from public/, not src/app/. Tailwind scans src/ for class names and
+   * reads a .ico as text — the binary yields a garbage candidate that breaks
+   * the whole stylesheet build. public/ is excluded from that scan.
+   */
+  icons: { icon: "/favicon.ico" },
   openGraph: {
     title: `${BRAND.unitShort} ${BRAND.product}`,
     siteName: BRAND.institution,

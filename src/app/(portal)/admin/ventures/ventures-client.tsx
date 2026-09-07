@@ -22,6 +22,7 @@ import {
 } from "@/components/ui";
 import { useToast } from "@/components/ui/toast";
 import { apiFetch } from "@/lib/client";
+import { ImportVentures } from "@/components/import-ventures";
 
 type Person = { _id: string; name: string; email: string };
 type Student = { _id: string; rollNumber: string; userId?: { name?: string; email?: string } };
@@ -29,8 +30,12 @@ type Venture = {
   _id: string;
   ventureName: string;
   industry?: string;
+  currentStage?: string;
   problemStatement?: string;
   solution?: string;
+  bottlenecks?: string;
+  resources?: string;
+  guidance?: string;
   status: string;
   studentId?: Student;
   facultyId?: Person | null;
@@ -41,8 +46,12 @@ const emptyForm = {
   studentId: "",
   ventureName: "",
   industry: "",
+  currentStage: "",
   problemStatement: "",
   solution: "",
+  bottlenecks: "",
+  resources: "",
+  guidance: "",
   facultyId: "",
   mentorId: "",
   status: "ACTIVE",
@@ -94,8 +103,12 @@ export function VenturesClient({
           studentId: form.studentId,
           ventureName: form.ventureName,
           industry: form.industry,
+          currentStage: form.currentStage,
           problemStatement: form.problemStatement,
           solution: form.solution,
+          bottlenecks: form.bottlenecks,
+          resources: form.resources,
+          guidance: form.guidance,
           facultyId: form.facultyId || null,
           mentorId: form.mentorId || null,
         },
@@ -120,8 +133,12 @@ export function VenturesClient({
         json: {
           ventureName: form.ventureName,
           industry: form.industry,
+          currentStage: form.currentStage,
           problemStatement: form.problemStatement,
           solution: form.solution,
+          bottlenecks: form.bottlenecks,
+          resources: form.resources,
+          guidance: form.guidance,
           facultyId: form.facultyId || null,
           mentorId: form.mentorId || null,
           status: form.status,
@@ -171,20 +188,28 @@ export function VenturesClient({
       )}
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Venture name" required>
+        <Field label="Startup/business name" required>
           <Input
             value={form.ventureName}
             onChange={(e) => setForm({ ...form, ventureName: e.target.value })}
           />
         </Field>
-        <Field label="Industry">
+        <Field label="Startup/business sectors">
           <Input
-            placeholder="e.g. Agritech"
+            placeholder="e.g. Agritech, Logistics"
             value={form.industry}
             onChange={(e) => setForm({ ...form, industry: e.target.value })}
           />
         </Field>
       </div>
+
+      <Field label="Current stage" hint="Idea, prototype, pilot, revenue — however the founder describes it.">
+        <Input
+          placeholder="e.g. Prototype with 3 pilot customers"
+          value={form.currentStage}
+          onChange={(e) => setForm({ ...form, currentStage: e.target.value })}
+        />
+      </Field>
 
       <Field label="Problem statement">
         <Textarea
@@ -199,6 +224,30 @@ export function VenturesClient({
           rows={3}
           value={form.solution}
           onChange={(e) => setForm({ ...form, solution: e.target.value })}
+        />
+      </Field>
+
+      <Field label="Bottlenecks / constraints">
+        <Textarea
+          rows={3}
+          value={form.bottlenecks}
+          onChange={(e) => setForm({ ...form, bottlenecks: e.target.value })}
+        />
+      </Field>
+
+      <Field label="Resources that you have">
+        <Textarea
+          rows={3}
+          value={form.resources}
+          onChange={(e) => setForm({ ...form, resources: e.target.value })}
+        />
+      </Field>
+
+      <Field label="Guidance that you need from us">
+        <Textarea
+          rows={3}
+          value={form.guidance}
+          onChange={(e) => setForm({ ...form, guidance: e.target.value })}
         />
       </Field>
 
@@ -249,19 +298,22 @@ export function VenturesClient({
         description="One venture per student, with the faculty and mentor guiding it."
         breadcrumb="Admin"
         action={
-          <Button
-            onClick={() => {
-              setForm(emptyForm);
-              setCreating(true);
-            }}
-            disabled={availableStudents.length === 0}
-            title={
-              availableStudents.length === 0 ? "Every student already has a venture." : undefined
-            }
-          >
-            <Plus className="h-4 w-4" />
-            Add venture
-          </Button>
+          <>
+            <ImportVentures />
+            <Button
+              onClick={() => {
+                setForm(emptyForm);
+                setCreating(true);
+              }}
+              disabled={availableStudents.length === 0}
+              title={
+                availableStudents.length === 0 ? "Every student already has a venture." : undefined
+              }
+            >
+              <Plus className="h-4 w-4" />
+              Add venture
+            </Button>
+          </>
         }
       />
 
@@ -342,8 +394,12 @@ export function VenturesClient({
                             studentId: String(venture.studentId?._id ?? ""),
                             ventureName: venture.ventureName ?? "",
                             industry: venture.industry ?? "",
+                            currentStage: venture.currentStage ?? "",
                             problemStatement: venture.problemStatement ?? "",
                             solution: venture.solution ?? "",
+                            bottlenecks: venture.bottlenecks ?? "",
+                            resources: venture.resources ?? "",
+                            guidance: venture.guidance ?? "",
                             facultyId: String(venture.facultyId?._id ?? ""),
                             mentorId: String(venture.mentorId?._id ?? ""),
                             status: venture.status ?? "ACTIVE",

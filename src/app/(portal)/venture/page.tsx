@@ -81,6 +81,46 @@ export default async function VenturePage() {
               )}
             </CardBody>
           </Card>
+
+          {/* The rest of the intake sheet the office holds for this venture. */}
+          {[
+            {
+              key: "bottlenecks",
+              title: "Bottlenecks and constraints",
+              description: "What is holding the venture back.",
+              value: venture.bottlenecks,
+              empty: "Nothing recorded yet.",
+            },
+            {
+              key: "resources",
+              title: "Resources you have",
+              description: "What the venture can already draw on.",
+              value: venture.resources,
+              empty: "Nothing recorded yet.",
+            },
+            {
+              key: "guidance",
+              title: "Guidance you need from us",
+              description: "What you have asked the IEV office for.",
+              value: venture.guidance,
+              empty: "Nothing recorded yet.",
+            },
+          ]
+            .filter((section) => section.value)
+            .map((section) => (
+              <Card key={section.key}>
+                <CardHeader
+                  title={section.title}
+                  description={section.description}
+                  icon={<Lightbulb className="h-4 w-4" />}
+                />
+                <CardBody>
+                  <p className="text-[13.5px] leading-6.5 whitespace-pre-wrap text-[var(--fg)]">
+                    {section.value}
+                  </p>
+                </CardBody>
+              </Card>
+            ))}
         </div>
 
         <div className="space-y-5">
@@ -118,7 +158,8 @@ export default async function VenturePage() {
             <CardHeader title="At a glance" icon={<Building2 className="h-4 w-4" />} />
             <CardBody className="space-y-3 text-[13px]">
               <Row label="Venture" value={venture.ventureName} />
-              <Row label="Industry" value={venture.industry || "Not set"} />
+              <Row label="Sectors" value={venture.industry || "Not set"} />
+              <Row label="Current stage" value={venture.currentStage || "Not set"} />
               <Row label="Status" value={<StatusBadge status={venture.status} />} />
               <Row
                 label="Student"

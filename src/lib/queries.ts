@@ -1,4 +1,5 @@
 import "server-only";
+import { Types } from "mongoose";
 import { connectDB } from "@/lib/db";
 import {
   ActivityResource,
@@ -119,6 +120,97 @@ export async function getStartupConclave() {
   if (!activity) return null;
   const conclave = await StartupConclave.findOne({ activityId: activity._id }).lean<any>();
   return serialize({ activity, conclave });
+}
+
+/* ──────────────────────────── student dossier ───────────────────────── */
+
+/**
+ * Everything the portal holds about one student, for the admin detail page:
+ * account, profile, venture, and their slice of all six activities.
+ *
+ * Each activity document holds the whole batch, so every list here is filtered
+ * down to this student before it leaves the server — an admin view still has no
+ * reason to ship the rest of the cohort's records to the browser.
+ */
+export async function getStudentDossier(studentId: string) {
+  // A malformed id is a wrong URL, not a server fault: findById would throw a
+  // CastError, and a page has no error mapping to turn that into a 404.
+  if (!Types.ObjectId.isValid(studentId)) return null;
+
+  await connectDB();
+
+  const student = await Student.findById(studentId)
+    .populate("userId", "name email status role lastLoginAt createdAt")
+    .lean<any>();
+  if (!student) return null;
+
+  const sid = String(student._id);
+  const mine = (id: unknown) => String(id) === sid;
+
+  const [activities, venture, workshopDoc, mentoringDoc, demoDayDoc, resources] = await Promise.all([
+    VentureActivity.find({ ventureId: null }).lean<any[]>(),
+    StudentVenture.findOne({ studentId })
+      .populate("facultyId", "name email")
+      .populate("mentorId", "name email")
+      .lean<any>(),
+    Workshop.findOne().lean<any>(),
+    Mentoring.findOne()
+      .populate("assignments.facultyId", "name email")
+      .populate("assignments.mentorId", "name email")
+      .populate("sessions.facultyReview.facultyId", "name email")
+      .populate("sessions.mentorReview.mentorId", "name email")
+      .lean<any>(),
+    DemoDay.findOne().lean<any>(),
+    ActivityResource.find({ studentId }).sort({ category: 1, fileName: 1 }).lean<any[]>(),
+  ]);
+
+  // Workshop: every session, annotated with this student's attendance. Sessions
+  // where they were never marked show as "not recorded" rather than absent.
+  const workshopSessions = (workshopDoc?.sessions ?? []).map((s: any) => {
+    const entry = (s.participants ?? []).find((p: any) => mine(p.studentId));
+    return {
+      _id: s._id,
+      title: s.title,
+      date: s.date,
+      startTime: s.startTime,
+      endTime: s.endTime,
+      speaker: s.speaker,
+      venue: s.venue,
+      attendance: entry?.attendance ?? null,
+      note: entry?.note ?? null,
+    };
+  });
+
+  const assignment = (mentoringDoc?.assignments ?? []).find((a: any) => mine(a.studentId)) ?? null;
+  const mentoringSessions = (mentoringDoc?.sessions ?? []).filter((s: any) => mine(s.studentId));
+
+  const demoRounds = (demoDayDoc?.rounds ?? []).map((r: any) => ({
+    _id: r._id,
+    type: r.type,
+    date: r.date,
+    startTime: r.startTime,
+    endTime: r.endTime,
+    submissionsOpen: r.submissionsOpen,
+    submission: (r.submissions ?? []).find((s: any) => mine(s.studentId)) ?? null,
+  }));
+
+  return serialize({
+    student,
+    venture,
+    activities,
+    workshop: {
+      title: workshopDoc?.title ?? null,
+      sessions: workshopSessions,
+      attended: workshopSessions.filter((s: any) => s.attendance === "PRESENT").length,
+    },
+    mentoring: {
+      faculty: assignment?.facultyId ?? null,
+      mentor: assignment?.mentorId ?? null,
+      sessions: mentoringSessions,
+    },
+    demoRounds,
+    resources,
+  });
 }
 
 /* ─────────────────────────────── directory ──────────────────────────── */

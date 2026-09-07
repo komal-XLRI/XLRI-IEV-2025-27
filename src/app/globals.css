@@ -60,6 +60,13 @@
   --danger: #b42318;
   --danger-soft: #fdecea;
 
+  /*
+   * Text drawn on top of a solid --ok / --warn / --danger / --brand fill.
+   * These fills are dark in the light theme and light in the dark theme, so the
+   * label has to flip with them — white on both would be unreadable in dark.
+   */
+  --on-accent: #ffffff;
+
   --ring: #3b63c0;
   --shadow-sm: 0 1px 2px rgb(16 24 40 / 0.05);
   --shadow-md: 0 2px 4px -1px rgb(16 24 40 / 0.06), 0 4px 12px -2px rgb(16 24 40 / 0.08);
@@ -98,6 +105,8 @@
   --info-soft: #12253d;
   --danger: #f27c72;
   --danger-soft: #3a1613;
+
+  --on-accent: #0a142b;
 
   --ring: #6aa9e9;
   --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);

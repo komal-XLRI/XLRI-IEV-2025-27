@@ -56,9 +56,15 @@ const studentVentureSchema = new Schema<any>(
   {
     studentId: { type: ObjectId, ref: "Student", required: true, index: true },
     ventureName: { type: String, required: true, trim: true },
+    // "Startup/business sectors" on the intake sheet.
     industry: { type: String, trim: true },
     problemStatement: { type: String },
     solution: { type: String },
+    // The rest of the intake sheet the office collects from each founder.
+    currentStage: { type: String, trim: true },
+    bottlenecks: { type: String },
+    resources: { type: String },
+    guidance: { type: String },
     facultyId: { type: ObjectId, ref: "User" },
     mentorId: { type: ObjectId, ref: "User" },
     status: { type: String, enum: ["ACTIVE", "INACTIVE"], default: "ACTIVE" },

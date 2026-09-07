@@ -37,10 +37,12 @@ const bodySchema = z.discriminatedUnion("action", [
     action: z.literal("setAttendance"),
     workshopId: z.string(),
     sessionId: z.string(),
+    // Marking a sheet may also settle the date it was taken on.
+    date: z.string().optional().nullable(),
     entries: z.array(
       z.object({
         studentId: z.string(),
-        attendance: z.enum(["PRESENT", "ABSENT", "EXCUSED"]),
+        attendance: z.enum(["PRESENT", "ABSENT"]),
       }),
     ),
   }),
@@ -95,6 +97,7 @@ export const POST = withRoute(async (req) => {
         studentId: e.studentId,
         attendance: e.attendance,
       }));
+      if (body.date !== undefined) session.date = body.date ? new Date(body.date) : null;
       break;
     }
 
