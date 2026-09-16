@@ -107,15 +107,15 @@ export default async function StudentDetailPage({
           All students
         </Link>
 
-        <Card className="overflow-hidden">
-          <div className="relative h-24 bg-[var(--color-navy-900)]">
+        <Card className="isolate overflow-hidden">
+          <div className="relative z-0 h-24 bg-[var(--color-navy-900)]">
             <div className="surface-grid absolute inset-0 opacity-[0.08]" />
             <div className="absolute inset-x-0 bottom-0 h-[3px] bg-[var(--color-xlri-green)]" />
           </div>
 
           <div className="px-5 pb-5 sm:px-6 sm:pb-6">
-            <div className="flex">
-              <span className="-mt-10 grid h-20 w-20 shrink-0 place-items-center rounded-2xl border-4 border-[var(--surface)] bg-[var(--brand)] text-[22px] leading-none font-semibold text-[var(--brand-fg)]">
+            <div className="relative z-10 flex">
+              <span className="relative z-10 -mt-10 grid h-20 w-20 shrink-0 place-items-center rounded-2xl border-4 border-[var(--surface)] bg-[var(--brand)] text-[22px] leading-none font-semibold text-[var(--brand-fg)]">
                 {initials(user.name)}
               </span>
             </div>
